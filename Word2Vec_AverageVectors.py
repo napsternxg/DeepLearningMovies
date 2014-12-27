@@ -49,6 +49,8 @@ def makeFeatureVec(words, model, num_features):
             featureVec = np.add(featureVec,model[word])
     #
     # Divide the result by the number of words to get the average
+    if nwords <= 1.:
+        nwords = 1.
     featureVec = np.divide(featureVec,nwords)
     return featureVec
 
@@ -90,9 +92,14 @@ def getCleanReviews(reviews):
 if __name__ == '__main__':
 
     # Read data from files
-    train = pd.read_csv( os.path.join(os.path.dirname(__file__), 'data', 'labeledTrainData.tsv'), header=0, delimiter="\t", quoting=3 )
-    test = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data', 'testData.tsv'), header=0, delimiter="\t", quoting=3 )
-    unlabeled_train = pd.read_csv( os.path.join(os.path.dirname(__file__), 'data', "unlabeledTrainData.tsv"), header=0,  delimiter="\t", quoting=3 )
+    train = pd.read_csv( os.path.join(os.path.dirname(__file__), 'data',
+                                      'labeledTrainData.tsv'), delimiter="\t")
+    test = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data',
+                                    'testData.tsv'), delimiter="\t")
+    unlabeled_train = pd.read_csv( os.path.join(os.path.dirname(__file__),
+                                                'data',
+                                                "unlabeledTrainData.tsv"),
+                                  delimiter="\t", quoting=3)
 
     # Verify the number of reviews that were read (100,000 in total)
     print "Read %d labeled train reviews, %d labeled test reviews, " \
@@ -128,7 +135,7 @@ if __name__ == '__main__':
     # Set values for various parameters
     num_features = 300    # Word vector dimensionality
     min_word_count = 40   # Minimum word count
-    num_workers = 4       # Number of threads to run in parallel
+    num_workers = 20       # Number of threads to run in parallel
     context = 10          # Context window size
     downsampling = 1e-3   # Downsample setting for frequent words
 
@@ -165,8 +172,12 @@ if __name__ == '__main__':
     print "Creating average feature vecs for test reviews"
 
     testDataVecs = getAvgFeatureVecs( getCleanReviews(test), model, num_features )
-
-
+    """
+    from sklearn import preprocessing
+    scaler = preprocessing.StandardScaler().fit(trainDataVecs)
+    trainDataVecs = scaler.transform(trainDataVecs)
+    testDataVecs = scaler.transform(testDataVecs)
+    """
     # ****** Fit a random forest to the training set, then make predictions
     #
     # Fit a random forest to the training data, using 100 trees
@@ -180,5 +191,6 @@ if __name__ == '__main__':
 
     # Write the test results
     output = pd.DataFrame( data={"id":test["id"], "sentiment":result} )
-    output.to_csv( "Word2Vec_AverageVectors.csv", index=False, quoting=3 )
-    print "Wrote Word2Vec_AverageVectors.csv"
+    output.to_csv( os.path.join(os.path.dirname(__file__),
+                                'data', "Word2Vec_AverageVectors.csv"), index=False, quoting=2)
+    print "Wrote data/Word2Vec_AverageVectors.csv"

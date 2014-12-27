@@ -1,4 +1,6 @@
-.pyc
+*.err
+*.log
+*.out
 *.pyo
 *.pyc
 .*.swp
