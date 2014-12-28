@@ -99,8 +99,8 @@ if __name__ == '__main__':
     #
 
     # Read data from files
-    train = pd.read_csv( os.path.join(os.path.dirname(__file__), 'data', 'labeledTrainData.tsv'), header=0, delimiter="\t", quoting=3 )
-    test = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data', 'testData.tsv'), header=0, delimiter="\t", quoting=3 )
+    train = pd.read_csv( os.path.join(os.path.dirname(__file__), 'data', 'labeledTrainData.tsv'), delimiter="\t")
+    test = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data', 'testData.tsv'), delimiter="\t")
 
 
     print "Cleaning training reviews"
@@ -151,5 +151,6 @@ if __name__ == '__main__':
 
     # Write the test results
     output = pd.DataFrame(data={"id":test["id"], "sentiment":result})
-    output.to_csv("BagOfCentroids.csv", index=False, quoting=3)
-    print "Wrote BagOfCentroids.csv"
+    output.to_csv(os.path.join(os.path.dirname(__file__),
+                               'data',"BagOfCentroids.csv"), index=False, quoting=2)
+    print "Wrote data/BagOfCentroids.csv"
