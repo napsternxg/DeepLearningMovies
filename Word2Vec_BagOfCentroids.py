@@ -18,6 +18,8 @@ from sklearn.cluster import KMeans
 import time
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import roc_auc_score
 from bs4 import BeautifulSoup
 import re
 from nltk.corpus import stopwords
@@ -48,6 +50,22 @@ def create_bag_of_centroids( wordlist, word_centroid_map ):
     # Return the "bag of centroids"
     return bag_of_centroids
 
+
+def train_test_save(classifier, train_data, train_labels,\
+                    test_data, test_id, output_file):
+
+    # Fitting the forest may take a few minutes
+    print "Fitting a random forest to labeled training data..."
+    classifier = classifier.fit(train_data,train_labels)
+    result = classifier.predict(test_data)
+    #roc_auc_score(y_true, result)
+
+    # Write the test results
+    output = pd.DataFrame(data={"id":test_id, "sentiment":result})
+    output_path = os.path.join(os.path.dirname(__file__),'data',output_file)
+    output.to_csv(output_path, index=False, quoting=2)
+    print "Wrote %s" % (output_path)
+    return True
 
 if __name__ == '__main__':
 
@@ -138,19 +156,15 @@ if __name__ == '__main__':
         test_centroids[counter] = create_bag_of_centroids( review, \
             word_centroid_map )
         counter += 1
-
-
+    """
     # ****** Fit a random forest and extract predictions
     #
     forest = RandomForestClassifier(n_estimators = 100)
-
-    # Fitting the forest may take a few minutes
-    print "Fitting a random forest to labeled training data..."
-    forest = forest.fit(train_centroids,train["sentiment"])
-    result = forest.predict(test_centroids)
-
-    # Write the test results
-    output = pd.DataFrame(data={"id":test["id"], "sentiment":result})
-    output.to_csv(os.path.join(os.path.dirname(__file__),
-                               'data',"BagOfCentroids.csv"), index=False, quoting=2)
-    print "Wrote data/BagOfCentroids.csv"
+    train_test_save(forest,train_centroids,train["sentiment"],test_centroids,test["id"],"BagOfCentroids_RF.csv")
+    """
+    # ****** Fit a SVM and extract predictions
+    #
+    clf = SVC(kernel="linear", C=0.025)
+    train_test_save(clf,train_centroids,train["sentiment"],test_centroids,test["id"],"BagOfCentroids_SVC_linear.csv")
+    clf = SVC(gamma=2, C=1)
+    train_test_save(clf,train_centroids,train["sentiment"],test_centroids,test["id"],"BagOfCentroids_SVC_RBF.csv")
