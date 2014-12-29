@@ -17,8 +17,9 @@ from gensim.models import Word2Vec
 from sklearn.cluster import KMeans
 import time
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.svm import SVC
+from sklearn.linear_model import Perceptron, SGDClassifier
 from sklearn.metrics import roc_auc_score
 from bs4 import BeautifulSoup
 import re
@@ -164,7 +165,13 @@ if __name__ == '__main__':
     """
     # ****** Fit a SVM and extract predictions
     #
-    clf = SVC(kernel="linear", C=0.025)
-    train_test_save(clf,train_centroids,train["sentiment"],test_centroids,test["id"],"BagOfCentroids_SVC_linear.csv")
-    clf = SVC(gamma=2, C=1)
-    train_test_save(clf,train_centroids,train["sentiment"],test_centroids,test["id"],"BagOfCentroids_SVC_RBF.csv")
+    #clf = SVC(kernel="linear", C=0.025)
+    #train_test_save(clf,train_centroids,train["sentiment"],test_centroids,test["id"],"BagOfCentroids_SVC_linear.csv")
+    #clf = SVC(kernel="poly", C=0.025)
+    #train_test_save(clf,train_centroids,train["sentiment"],test_centroids,test["id"],"BagOfCentroids_SVC_POLY3.csv")
+    clf = Perceptron(penalty='l2',n_jobs=-1,n_iter=10)
+    train_test_save(clf,train_centroids,train["sentiment"],test_centroids,test["id"],"BagOfCentroids_Perceptron.csv")
+    clf = SGDClassifier(penalty='l2',n_jobs=-1,n_iter=10)
+    train_test_save(clf,train_centroids,train["sentiment"],test_centroids,test["id"],"BagOfCentroids_SGD.csv")
+    clf = AdaBoostClassifier(n_estimators = 100)
+    train_test_save(clf,train_centroids,train["sentiment"],test_centroids,test["id"],"BagOfCentroids_AdaBoost.csv")
